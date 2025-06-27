@@ -1,0 +1,11 @@
+# Ignorar arquivos JetBrains IDEs
+.idea/
+
+# Ignorar arquivos de configuração do Visual Studio Code
+.vscode/    
+
+# Ignorar arquivos checkpoint do Jupyter Notebook/ Lab
+.ipynb_checkpoints/
+
+# Ignorar diretório test
+test/
