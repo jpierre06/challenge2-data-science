@@ -9,3 +9,7 @@
 
 # Ignorar diretório test
 test/
+
+# Ignorar arquivos de cache do Python
+__pycache__/
+scripts/__pycache__/
