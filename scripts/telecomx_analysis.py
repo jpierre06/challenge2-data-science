@@ -3,6 +3,9 @@ import numpy as np
 import json
 import requests
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 import scripts.local_tools as lt
 
 
@@ -111,7 +114,11 @@ def tratar_colunas_valores_binarios(df: pd.DataFrame, imprimir=True):
     df['internet_Service_Description'] = df['internet_InternetService']
     df['internet_InternetService'] = df['internet_InternetService'].map({'No': 0, 'DSL': 1, 'Fiber optic': 1})
 
-    colunas_valores_binarios.extend(['internet_InternetService', 'customer_SeniorCitizen'])
+    # Identificação de colunas com valores binários
+    colunas_valores_binarios = []
+    for c in df.columns:
+        if len(set(df[c].unique()).difference(set([0, 1]))) == 0:
+            colunas_valores_binarios.append(c)
 
     if imprimir:
         for c in colunas_valores_binarios:
@@ -180,3 +187,80 @@ def calcular_percentual_churn_categoria(df: pd.DataFrame, categoria:str):
     
         
     return df_agg
+
+
+def graf_percentual_chrun(df: pd.DataFrame):
+    ...
+    # Calcular percentual
+    churn_percent = df['Churn'].value_counts(normalize=True).reset_index()
+    churn_percent.columns = ['Churn', 'Percent']
+    churn_percent['Churn'] = churn_percent['Churn'].map({0: 'Não', 1: 'Sim'})
+    churn_percent['Percent'] *= 100
+
+    sns.set(style='whitegrid')
+    plt.figure(figsize=(6, 4))
+    ax = sns.barplot(data=churn_percent, x='Churn', y='Percent', palette='Blues_d')
+
+    # Adicionar rótulos de valor no topo das barras
+    for i in ax.containers:
+        ax.bar_label(i, fmt='%.1f%%')
+
+    #Remover bordas
+    for spine in ['top', 'right']:
+        ax.spines[spine].set_visible(False)
+
+    # Grid Y ao fundo
+    ax.set_axisbelow(True)
+    ax.yaxis.grid(True, linestyle='--', linewidth=0.7)
+
+
+    ax.set_title('Percentual de Clientes com Churn')
+    ax.set_xlabel('Churn')
+    ax.set_ylabel('Percentual (%)')
+    ax.set_ylim(0, 100)
+
+    return plt
+
+
+def graf_boxplot_churn(df: pd.DataFrame):
+    ...
+    # Boxplot para Charges Monthly
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    sns.boxplot(x='Churn', y='account_Charges_Monthly', data=df, ax=axes[0])
+    axes[0].set_title('Valor Mensal vs Churn')
+
+    # Boxplot para Tenure
+    sns.boxplot(x='Churn', y='customer_tenure', data=df, ax=axes[1])
+    axes[1].set_title('Tempo de Contrato vs Churn')
+
+    plt.tight_layout()
+
+    # Remover bordas
+    for spine in ['top', 'right']:
+        plt.gca().spines[spine].set_visible(False)
+
+    return plt
+
+
+def graf_distribuicao_churn(df: pd.DataFrame):
+    ...
+    # KDEplot para Charges Monthly e customer_tenure
+    plt.figure(figsize=(12, 5))
+
+    # Valor mensal
+    plt.subplot(1, 2, 1)
+    sns.kdeplot(data=df, x='account_Charges_Monthly', hue='Churn', fill=True)
+    plt.title('Distribuição do Valor Mensal por Churn')
+
+    # Tempo de contrato
+    plt.subplot(1, 2, 2)
+    sns.kdeplot(data=df, x='customer_tenure', hue='Churn', fill=True)
+    plt.title('Distribuição do Tempo de Contrato por Churn')
+
+    plt.tight_layout()
+
+    # Remover bordas
+    for spine in ['top', 'right']:
+        plt.gca().spines[spine].set_visible(False)
+
+    return plt
