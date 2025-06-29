@@ -134,7 +134,7 @@ def criar_colunas_derivadas(df):
 
     # Informações de contratos mensais
     df['account_Contract_Month'] = np.where(
-        (df['account_Contract'].lower() == 'month-to-month') , 
+        (df['account_Contract'].str.lower() == 'month-to-month') , 
         1, 
         0
     )
