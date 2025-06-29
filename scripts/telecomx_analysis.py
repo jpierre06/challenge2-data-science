@@ -107,7 +107,7 @@ def tratar_colunas_valores_binarios(df: pd.DataFrame, imprimir=True):
 
     # Conversão numerica dos valores binários
     for c in colunas_valores_binarios:
-        print(f'Coluna: {c}. Quantidade de domínios: {df[c].nunique()}. Valores do domínios: {np.unique(df[c])}\n') if imprimir else None
+        #print(f'Coluna: {c}. Quantidade de domínios: {df[c].nunique()}. Valores do domínios: {np.unique(df[c])}\n') if imprimir else None
         df[c] = df[c].map({'No': 0, 'Yes': 1})
 
     # Criação de uma coluna com descrição de serviço de internet para transformar internet_InternetService em coluna com valor binário
@@ -129,6 +129,16 @@ def tratar_colunas_valores_binarios(df: pd.DataFrame, imprimir=True):
 
 def criar_colunas_derivadas(df):
     
+    #   Criação de coluna por faixa tempo de contrato do cliente 
+    df['customer_tenure_bins'] = df['customer_tenure'].apply(lambda x: f'{(x // 6) * 6:03}-{(x // 6) * 6 + 5:03}')
+
+    # Informações de contratos mensais
+    df['account_Contract_Month'] = np.where(
+        (df['account_Contract'].lower() == 'month-to-month') , 
+        1, 
+        0
+    )
+
     colunas_internet_additional_service = [
         'internet_OnlineSecurity', 
         'internet_OnlineBackup', 
