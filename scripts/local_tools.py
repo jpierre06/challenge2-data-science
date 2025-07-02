@@ -5,6 +5,7 @@ import ipykernel
 import pandas as pd
 import numpy as np
 from scipy import stats
+import math
 
 from ydata_profiling import ProfileReport
 
@@ -12,6 +13,13 @@ from ydata_profiling import ProfileReport
 def print_notebook_versions():
     print(f"JupyterLab: {jupyterlab.__version__}\n")
     print(f"ipykernel: {ipykernel.__version__}")
+
+
+def round_magnitude(n):
+    if n <= 0:
+        return 0 
+    power = 10 ** (len(str(int(n))) - 1)
+    return math.ceil(n / power) * power
 
 
 def count_zero(array:np.array):
