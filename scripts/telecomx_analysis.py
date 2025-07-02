@@ -34,6 +34,7 @@ def extrair_colunas_categoricas(df: pd.DataFrame, quantidade_minima=5, imprimir=
 
     return colunas_categoricas
 
+
 def extrair_colunas_numericas(df: pd.DataFrame, colunas_categoricas: list, deletar_colunas:list, imprimir=True):
     
     colunas_numericas = list(set(df.columns).difference(set(colunas_categoricas)))
@@ -43,7 +44,14 @@ def extrair_colunas_numericas(df: pd.DataFrame, colunas_categoricas: list, delet
 
     return colunas_numericas
 
-def tratar_valores_invalidados(df: pd.DataFrame, imprimir=True):
+
+def perc_registros_churn_invalidados(df: pd.DataFrame, lista_valores_invalidos = ['', ' ', None, 'Nan']):
+    num_invalidos = len(df[df['Churn'].isin(lista_valores_invalidos)])
+    num_total = len(df)
+    return num_invalidos / num_total 
+
+
+def tratar_valores_invalidados(df: pd.DataFrame, limite_delecao=0.05, imprimir=True):
     lista_valores_invalidos = ['', ' ', None, 'Nan']
 
     if imprimir:
