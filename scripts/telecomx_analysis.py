@@ -105,6 +105,14 @@ def tratar_valores_invalidados(df: pd.DataFrame, limite_delecao=0.05, imprimir=T
     return df
 
 
+def identificar_colunas_valores_binarios(df: pd.DataFrame):
+    colunas = []
+    for c in df.columns:
+        if len(set(df[c].unique()).difference(set([0, 1]))) == 0:
+            colunas.append(c)                                         
+    return colunas
+
+
 def tratar_colunas_valores_binarios(df: pd.DataFrame, imprimir=True):
     # Como existe uma coluna de phone_PhoneService, não é necessário detalhar essa informação na coluna phone_MultipleLines. 
     # Sendo possível transformar a mesma em dado binário
