@@ -241,17 +241,26 @@ def conversao_tipos(df):
     return df
 
 
-def calcular_percentual_churn_categoria(df: pd.DataFrame, categoria:str):
+def calcular_percentual_churn_categoria(df: pd.DataFrame, categoria:str, totalizador:bool=True):
     df_agg = df.groupby([categoria], observed=True).agg(
         customer = ('Churn', 'count'),
         churn = ('Churn', 'sum'),
         perc_churn_customer = ('Churn', lt.apply_percent_category),
     ).reset_index()
     
-    df_agg.perc_churn_customer = round(df_agg.perc_churn_customer, 2)
-    df_agg.insert(2, 'perc_total_customer', round(df_agg.customer/ np.sum(df_agg.customer) *100, 2))
     
-        
+    df_agg.insert(2, 'perc_total_customer', df_agg.customer/ np.sum(df_agg.customer) *100)
+    
+    if totalizador:
+        total_dados = ['Total', df_agg['customer'].sum(), df_agg['perc_total_customer'].sum(), df_agg['churn'].sum()]
+        total_col = [categoria, 'customer', 'perc_total_customer', 'churn']
+        df_total = pd.DataFrame([total_dados], columns=total_col)
+        df_total['perc_churn_customer'] = df_total.churn / df_total.customer * 100        
+        df_agg = pd.concat([df_agg, df_total], ignore_index=True)
+    
+    df_agg.perc_total_customer = round(df_agg.perc_total_customer, 2)
+    df_agg.perc_churn_customer = round(df_agg.perc_churn_customer, 2)
+
     return df_agg
 
 
