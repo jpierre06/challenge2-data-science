@@ -157,10 +157,7 @@ def tratar_colunas_valores_binarios(df: pd.DataFrame, imprimir=True):
     df['internet_InternetService'] = df['internet_InternetService'].map({'No': 0, 'DSL': 1, 'Fiber optic': 1})
 
     # Identificação de colunas com valores binários
-    colunas_valores_binarios = []
-    for c in df.columns:
-        if len(set(df[c].unique()).difference(set([0, 1]))) == 0:
-            colunas_valores_binarios.append(c)
+    colunas_valores_binarios = identificar_colunas_valores_binarios(df)
 
     if imprimir:
         for c in colunas_valores_binarios:
@@ -171,11 +168,28 @@ def tratar_colunas_valores_binarios(df: pd.DataFrame, imprimir=True):
 
 def criar_colunas_derivadas(df):
     
-    #   Criação de coluna por faixa tempo de contrato do cliente 
-    df['customer_tenure_bins'] = df['customer_tenure'].apply(lambda x: f'{(x // 6) * 6:03}-{(x // 6) * 6 + 5:03}')
+    #  Criação de coluna por faixa de tempo de contrato do cliente 
+    limite_bins = df.customer_tenure.max() + 13
+    bins = list(range(1, limite_bins, 12))
+    df['customer_tenure_bins'] = pd.cut(
+        df['customer_tenure'],
+        bins=bins,
+        right=False,  # intervalo fechado à esquerda, aberto à direita
+        labels=[f'{str(bins[i]).zfill(3)}-{str(bins[i+1]-1).zfill(3)}' for i in range(len(bins)-1)]
+    )
+
+    #  Criação de coluna por faixa de custo mensal do cliente 
+    limite_bins = df.account_Charges_Monthly.astype(int).max() + 21
+    bins = list(range(1, limite_bins, 20))
+    df['account_Charges_Monthly_bins'] = pd.cut(
+        df['account_Charges_Monthly'],
+        bins=bins,
+        right=False,  # intervalo fechado à esquerda, aberto à direita
+        labels=[f'R\${str(bins[i]).zfill(3)}-R\${str(bins[i+1]-1).zfill(3)}' for i in range(len(bins)-1)]
+    )
 
     # Informações de contratos mensais
-    df['account_Contract_Month'] = np.where(
+    df['account_Contract_Monthly'] = np.where(
         (df['account_Contract'].str.lower() == 'month-to-month') , 
         1, 
         0
