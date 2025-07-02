@@ -195,6 +195,12 @@ def describe_df_category(df, col_category, col_metric):
     return df_describe
 
 
+def convert_binary_to_descriptive(df: pd.DataFrame, cols_binary: list, values_descriptive: list = ['Não', 'Sim']):
+    for c in cols_binary:
+        df[c] = df[c].map({0: values_descriptive[0], 1: values_descriptive[1]})
+    return df
+
+
 def apply_percent_category(list_values: list):
     count_list = len(list_values)
     sum_list = sum(list_values) 
