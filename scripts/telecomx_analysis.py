@@ -53,21 +53,33 @@ def perc_registros_churn_invalidados(df: pd.DataFrame, lista_valores_invalidos =
 
 def tratar_valores_invalidados(df: pd.DataFrame, limite_delecao=0.05, imprimir=True):
     lista_valores_invalidos = ['', ' ', None, 'Nan']
+    num_invalidos = len(df[df['Churn'].isin(lista_valores_invalidos)])
+    num_total = len(df)
+
+    if (num_invalidos / num_total < limite_delecao) & (num_invalidos > 0):
+        df = df[~df['Churn'].isin(lista_valores_invalidos)]
+        texto_invalidos = f"""
+        Foram encontrados {num_invalidos} registros inválidos na variável Churn 
+        que representa {(num_invalidos/num_total*100):.2f}% do total de {num_total} registros e está 
+        no limite da deleção que é de {(limite_delecao*100):.2f}% e por isso foram deletados.
+        """
+        print(texto_invalidos) if imprimir else None
 
     if imprimir:
-        num_invalidos = len(df[df['Churn'].isin(lista_valores_invalidos)])
-        print(f'\nValores inválidos coluna Churn: {num_invalidos}')
+        print('\nRegistros inválidos antes do tratamento:')
+        print(f'\nValores inválidos na variável Churn: {num_invalidos}')
         num_invalidos = len(df[df['account_Charges_Total'].isin(lista_valores_invalidos)])
-        print(f'\nValores inválidos coluna account_Charges_Total: {num_invalidos}')
+        print(f'\nValores inválidos na variável account_Charges_Total: {num_invalidos}')
 
     df.Churn = df.Churn.replace(lista_valores_invalidos, 'No')
     df.account_Charges_Total = df.account_Charges_Total.replace(lista_valores_invalidos, '0')
 
     if imprimir:
+        print('\nRegistros inválidos depois do tratamento:')
         num_invalidos = len(df[df['Churn'].isin(lista_valores_invalidos)])
-        print(f'\nValores inválidos coluna Churn: {num_invalidos}')
+        print(f'\nValores inválidos na variável Churn: {num_invalidos}')
         num_invalidos = len(df[df['account_Charges_Total'].isin(lista_valores_invalidos)])
-        print(f'\nValores inválidos coluna account_Charges_Total: {num_invalidos}')
+        print(f'\nValores inválidos na variável account_Charges_Total: {num_invalidos}')
     
         # Verificar se existe algum cliente na base que não assina nenhum serviço
         num_inconsistentes = len(df[(df['phone_PhoneService'] == 'No') & (df['internet_InternetService'] == 'No')])
