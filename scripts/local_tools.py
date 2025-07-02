@@ -111,6 +111,7 @@ def describe_full_df(_df: pd.DataFrame):
     coefficient_variation = lambda x: pd.Series.std(x) / pd.Series.mean(x)
     shapiro_stat = lambda x: stats.shapiro(x)[0]
     shapiro_pvalue = lambda x: stats.shapiro(x)[1]
+    trim_mean_5p = lambda x: stats.trim_mean(x, proportiontocut=0.05)
     
     
     if np.all(df_describe.columns == cols_number):
@@ -121,6 +122,9 @@ def describe_full_df(_df: pd.DataFrame):
             'count_nonzero': np.count_nonzero,
             'count_unique': pd.Series.nunique,
             'mean': pd.Series.mean,
+            'geo_mean': stats.gmean,
+            'harm_mean': stats.hmean,
+            'trim_mean_5p': trim_mean_5p,
             'median': pd.Series.median,
             'mode': mode,
             'mode_lists': mode_lists,
@@ -161,8 +165,11 @@ def describe_full_df(_df: pd.DataFrame):
             
             list_metric = []
             for col, function in dict_functions.items():
-                list_metric.append(function(_df[col_n]))
-                    
+                try:
+                    list_metric.append(function(_df[col_n]))
+                except:
+                    list_metric.append(None)
+
             dict_data.update({col_n: list_metric})
 
         df_temp = pd.DataFrame(dict_data)
@@ -170,7 +177,7 @@ def describe_full_df(_df: pd.DataFrame):
 
         return pd.concat([df_temp])
     
-    
+
 def save_profile_report(df: pd.DataFrame, filename: str, title: str = "Pandas Profiling Report"):
     '''Saves a profile report of a DataFrame to an HTML file.'''
     
