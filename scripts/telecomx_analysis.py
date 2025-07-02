@@ -73,6 +73,20 @@ def tratar_valores_invalidados(df: pd.DataFrame, limite_delecao=0.05, imprimir=T
 
     df.Churn = df.Churn.replace(lista_valores_invalidos, 'No')
     df.account_Charges_Total = df.account_Charges_Total.replace(lista_valores_invalidos, '0')
+    df.account_Charges_Total = pd.to_numeric(df.account_Charges_Total, errors='coerce')
+    
+    df['customer_tenure'] = np.where(
+        (df['customer_tenure'] == 0) & (df['account_Charges_Monthly'] != 0), 
+        1, 
+        df['customer_tenure']
+    )
+
+    df['account_Charges_Total'] = np.where(
+        (df['account_Charges_Total'] == 0) & (df['customer_tenure'] == 1), 
+        df['account_Charges_Monthly'], 
+        df['account_Charges_Total']
+    )
+
 
     if imprimir:
         print('\nRegistros inválidos depois do tratamento:')
