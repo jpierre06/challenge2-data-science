@@ -5,6 +5,7 @@ import requests
 
 import seaborn as sns
 import matplotlib.pyplot as plt
+import warnings
 
 import scripts.local_tools as lt
 
@@ -273,7 +274,7 @@ def graf_percentual_chrun(df: pd.DataFrame):
     churn_percent['Percent'] *= 100
 
     sns.set(style='whitegrid')
-    plt.figure(figsize=(6, 4))
+    plt.figure(figsize=(7, 5))
     ax = sns.barplot(data=churn_percent, x='Churn', y='Percent', palette='Blues_d')
 
     # Adicionar rótulos de valor no topo das barras
@@ -298,15 +299,22 @@ def graf_percentual_chrun(df: pd.DataFrame):
 
 
 def graf_boxplot_churn(df: pd.DataFrame):
-    ...
+    # Gráficos com variáveis numéricas pré-definidas
+    df = df.copy()
+    df.Churn = df.Churn.map({0: 'Não', 1: 'Sim'})
+
     # Boxplot para Charges Monthly
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     sns.boxplot(x='Churn', y='account_Charges_Monthly', data=df, ax=axes[0])
-    axes[0].set_title('Valor Mensal vs Churn')
+    axes[0].set_title('Frequência    de Custo Mensal por Churn')
+    axes[0].set_xlabel('Churn')
+    axes[0].set_ylabel('Custo Mensal')
 
     # Boxplot para Tenure
     sns.boxplot(x='Churn', y='customer_tenure', data=df, ax=axes[1])
-    axes[1].set_title('Tempo de Contrato vs Churn')
+    axes[1].set_title('Frequência de Tempo de Contrato por Churn')
+    axes[1].set_xlabel('Churn')
+    axes[1].set_ylabel('\n\nTempo de Contrato (meses)')
 
     plt.tight_layout()
 
@@ -318,21 +326,151 @@ def graf_boxplot_churn(df: pd.DataFrame):
 
 
 def graf_distribuicao_churn(df: pd.DataFrame):
-    ...
+    # Gráficos com variáveis numéricas pré-definidas
+    df = df.copy()
+    df.Churn = df.Churn.map({0: 'Não', 1: 'Sim'})
+    
     # KDEplot para Charges Monthly e customer_tenure
-    plt.figure(figsize=(12, 5))
+    plt.figure(figsize=(14, 5))
 
     # Valor mensal
     plt.subplot(1, 2, 1)
     sns.kdeplot(data=df, x='account_Charges_Monthly', hue='Churn', fill=True)
-    plt.title('Distribuição do Valor Mensal por Churn')
+    plt.title('Distribuição de Churn por Custo Mensal')
+    plt.xlabel('Custo Mensal')
 
     # Tempo de contrato
     plt.subplot(1, 2, 2)
     sns.kdeplot(data=df, x='customer_tenure', hue='Churn', fill=True)
-    plt.title('Distribuição do Tempo de Contrato por Churn')
+    plt.title('Distribuição de Churn por Tempo de Contrato')
+    plt.xlabel('Tempo de Contrato (meses)')
 
     plt.tight_layout()
+
+    # Remover bordas
+    for spine in ['top', 'right']:
+        plt.gca().spines[spine].set_visible(False)
+
+    return plt
+
+
+def graf_boxplot_churn_varialvel_numerica(df: pd.DataFrame, variavel_numerica:str, titulo:str, x_label:str='', y_label:str=''):
+    # Gráficos com variáveis numéricas pré-definidas
+    df = df.copy()
+    df.Churn = df.Churn.map({0: 'Não', 1: 'Sim'})
+
+    # Boxplot para variável numérica
+    fig, axes = plt.subplots(figsize=(7, 5))
+    sns.boxplot(x='Churn', y=variavel_numerica, data=df, ax=axes)
+    axes.set_title(titulo)
+    axes.set_xlabel('Churn')
+    axes.set_ylabel(y_label)
+
+    plt.tight_layout()
+
+    # Remover bordas
+    for spine in ['top', 'right']:
+        plt.gca().spines[spine].set_visible(False)
+
+    return plt
+
+
+def graf_distribuicao_churn_varialvel_numerica(df: pd.DataFrame, variavel_numerica:str, titulo:str, x_label:str, y_label:str):
+    ...
+    warnings.simplefilter(action='ignore', category=FutureWarning)
+
+    df_temp = df.copy()
+    df_temp.Churn = df_temp.Churn.map({0: 'Não', 1: 'Sim'})
+    
+    # KDEplot para variavel_numerica
+    plt.figure(figsize=(14, 5))
+
+    # Tempo de contrato
+    plt.subplot(1, 2, 2)
+    sns.kdeplot(data=df_temp, x=variavel_numerica, hue='Churn', fill=True)
+    plt.title(titulo)
+
+    plt.xlabel(x_label)
+
+    plt.tight_layout()
+
+    # Remover bordas
+    for spine in ['top', 'right']:
+        plt.gca().spines[spine].set_visible(False)
+
+    return plt
+
+
+def graf_barra_customer_churn(df, var_categorica:str, titulo:str, x_label:str, y_label1:str, y_label2:str, paleta_cor='Blues', converte_bin=False):
+
+    df_temp = calcular_percentual_churn_categoria(df, var_categorica, False)
+    if converte_bin:
+        df_temp = lt.convert_binary_to_descriptive(df_temp, [var_categorica])
+        rotacao=0
+    else:
+        df_temp[var_categorica] = df_temp[var_categorica].astype(str)
+        rotacao=45
+    
+    top_ylim = lt.round_magnitude(df_temp.customer.max() *1.1)
+
+    plt.figure(figsize=(14, 5))
+
+    # % Base cliente
+    plt.subplot(1, 2, 1)
+    ax1 = sns.barplot(
+        data=df_temp,
+        x=var_categorica,
+        y='customer',
+        palette='Blues'
+    )
+
+    # Adicionar rótulos no topo das barras
+    for container in ax1.containers:
+        ax1.bar_label(container, padding=3)
+    
+    # Títulos e rótulos
+    plt.title(titulo)
+    plt.xlabel(x_label)
+    plt.xticks(rotation=rotacao)
+    plt.ylabel(y_label1)
+    plt.ylim(0, top_ylim)
+
+    # % Churn
+    ax2 = plt.subplot(1, 2, 2)
+    sns.barplot(
+        data=df_temp,
+        x=var_categorica,
+        y='perc_churn_customer',
+        palette='Blues'
+    )
+
+    # Adicionar rótulos no topo das barras
+    for container in ax2.containers:
+        ax2.bar_label(container, fmt='%.1f%%', padding=3)
+
+    # Títulos e rótulos
+    plt.title(titulo)
+    plt.xlabel(x_label)
+    plt.xticks(rotation=rotacao)
+    plt.ylabel(f'\n\n{y_label2}')
+    plt.ylim(0, 100)
+
+    # Ajuste da distância entre os subplots
+    plt.subplots_adjust(wspace=0.4)  # Aumenta o espaço horizontal
+    plt.tight_layout()
+    
+    return plt
+
+
+def graf_matriz_correlacao(df: pd.DataFrame, colunas_numericas: list, titulo:str):
+    # Matriz de correlação
+    plt.figure(figsize=(10, 6))
+    corr = df[colunas_numericas].corr()
+    sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm', square=True, cbar_kws={"shrink": .8})
+    
+    plt.title(titulo)
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
 
     # Remover bordas
     for spine in ['top', 'right']:
