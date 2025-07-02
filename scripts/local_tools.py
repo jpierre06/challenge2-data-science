@@ -211,3 +211,28 @@ def convert_types(df, list_columns: list, list_types: list):
             print(f"Column {col} not found in DataFrame.")
     
     return df
+
+
+def get_chi_square(df:pd.DataFrame, reference_category: str, target_category: list):
+    '''Calculates the chi-square statistic for two categorical variables in a DataFrame.'''
+    
+    data_stat = []
+    for c in target_category:
+        contingency_table = pd.crosstab(df[c], df[reference_category])
+        # chi2: Chi-square statistic
+        chi2, p, _, _ = stats.chi2_contingency(contingency_table)
+        # p: p-value of the test 
+        if p < 0.05:
+            significance = 1
+        else:
+            significance = 0
+        values = dict(variable = c, chi_square = chi2, p_value = p, significance = significance)
+
+        data_stat.append(values)
+
+        df_chi_square = pd.DataFrame(data_stat)
+        df_chi_square.chi_square = df_chi_square.chi_square.round(4)
+        df_chi_square.p_value = df_chi_square.p_value.round(6)
+        df_chi_square.sort_values(by='variable', ascending=True, inplace=True)
+
+    return df_chi_square
