@@ -120,6 +120,7 @@ def describe_full_df(_df: pd.DataFrame):
     shapiro_stat = lambda x: stats.shapiro(x)[0]
     shapiro_pvalue = lambda x: stats.shapiro(x)[1]
     int_mean_5p = lambda x: stats.trim_mean(x, proportiontocut=0.05)
+    int_mean_25p = lambda x: stats.trim_mean(x, proportiontocut=0.25)
     ampl_over_avg = lambda x: amplitude(x) / pd.Series.mean(x)
     
     if np.all(df_describe.columns == cols_number):
@@ -148,6 +149,7 @@ def describe_full_df(_df: pd.DataFrame):
             'count_lower_outlier': count_lower_outlier,
             'upper_outlier': upper_outlier,
             'count_upper_outlier': count_upper_outlier,
+            'int_mean_25%': int_mean_25p,
             'mean_abs_dev': mean_abs_deviation,
             'std_dev': pd.Series.std,
             'median_abs_dev': stats.median_abs_deviation,
