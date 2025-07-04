@@ -32,7 +32,7 @@ def count_zero(array:np.array):
 def mode_limits(list_values: list, max_mode=True):
     '''Calculates the mode of a list of values, returning the maximum or minimum mode value.'''
 
-    mode_values = mode_lists(pd.Series.mode(list_values))
+    mode_values = mode_list(pd.Series.mode(list_values))
     if max_mode:
         mode_values = np.max(mode_values)
     else:
@@ -40,7 +40,7 @@ def mode_limits(list_values: list, max_mode=True):
     return mode_values
 
 
-def mode_lists(list_values: list):
+def mode_list(list_values: list):
     mode_values = list(pd.Series.mode(list_values))
     return mode_values
 
@@ -54,7 +54,7 @@ def mode(list_values:list, count_mode=False):
     return mode_value
 
 
-def mode_count(list_values:list):
+def mode_freq(list_values:list):
     return mode(list_values, True)
 
 
@@ -111,7 +111,7 @@ def describe_full_df(_df: pd.DataFrame):
     
     percentile_25 = lambda x: np.percentile(x, 25)
     percentile_75 = lambda x: np.percentile(x, 75)
-    range_values = lambda x: np.max(x) - np.min(x)
+    amplitude = lambda x: np.max(x) - np.min(x)
     lower_outlier = lambda x: outlier_values(x, 'lower')
     upper_outlier = lambda x: outlier_values(x, 'upper')
     count_lower_outlier = lambda x: count_outlier_values(x, 'lower')
@@ -119,8 +119,8 @@ def describe_full_df(_df: pd.DataFrame):
     coefficient_variation = lambda x: pd.Series.std(x) / pd.Series.mean(x)
     shapiro_stat = lambda x: stats.shapiro(x)[0]
     shapiro_pvalue = lambda x: stats.shapiro(x)[1]
-    trim_mean_5p = lambda x: stats.trim_mean(x, proportiontocut=0.05)
-    
+    int_mean_5p = lambda x: stats.trim_mean(x, proportiontocut=0.05)
+    ampl_over_avg = lambda x: amplitude(x) / pd.Series.mean(x)
     
     if np.all(df_describe.columns == cols_number):
 
@@ -132,27 +132,28 @@ def describe_full_df(_df: pd.DataFrame):
             'mean': pd.Series.mean,
             'geo_mean': stats.gmean,
             'harm_mean': stats.hmean,
-            'trim_mean_5p': trim_mean_5p,
+            'int_mean_5%': int_mean_5p,
             'median': pd.Series.median,
             'mode': mode,
-            'mode_lists': mode_lists,
-            'mode_count': mode_count,
+            'mode_list': mode_list,
+            'mode_freq': mode_freq,
             'min': np.min,
             '25%': percentile_25,
             '50%': pd.Series.median,
             '75%': percentile_75,
             'max': np.max,
-            'range_values': range_values,
+            'amplitude': amplitude,
             'iqr': stats.iqr,
             'lower_outlier': lower_outlier,
             'count_lower_outlier': count_lower_outlier,
             'upper_outlier': upper_outlier,
             'count_upper_outlier': count_upper_outlier,
-            'mean_abs_deviation': mean_abs_deviation,
-            'std': pd.Series.std,
-            'median_abs_deviation': stats.median_abs_deviation,
-            'median_abs_deviation_norm': median_abs_deviation_norm,
-            'coefficient_variation': coefficient_variation, 
+            'mean_abs_dev': mean_abs_deviation,
+            'std_dev': pd.Series.std,
+            'median_abs_dev': stats.median_abs_deviation,
+            'median_abs_dev_norm': median_abs_deviation_norm,
+            'coefficient_var': coefficient_variation, 
+            'ampl_over_avg': ampl_over_avg,
             'variance': np.var,
             'kurt': pd.Series.kurt,
             'kurtosis': stats.kurtosis,
