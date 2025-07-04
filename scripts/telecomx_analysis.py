@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 import json
 import requests
 
@@ -187,6 +188,19 @@ def criar_colunas_derivadas(df):
         bins=bins,
         right=False,  # intervalo fechado à esquerda, aberto à direita
         labels=[f'R\${str(bins[i]).zfill(3)}-R\${str(bins[i+1]-1).zfill(3)}' for i in range(len(bins)-1)]
+    )
+
+    #  Criação de coluna por faixa de custo mensal do total 
+    # Usando Regra de Sturges
+    n = len(df)
+    # Regra de Sturges
+    k = 1 + (10/3) * math.log10(n)
+    k = int(k)
+    df['account_Charges_Total_bins'] = pd.cut(
+        df.account_Charges_Total, 
+        bins=k, 
+        right=False # intervalo fechado à esquerda, aberto à direita
+        labels=[f'R\${str(bins[i]).zfill(5)}-R\${str(bins[i+1]-1).zfill(5)}' for i in range(len(bins)-1)]
     )
 
     # Informações de contratos mensais
