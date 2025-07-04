@@ -241,7 +241,7 @@ def criar_colunas_derivadas(df):
     )
 
     # Criação de coluna de valores diários
-    df['account_Daily'] = df['account_Charges_Monthly'] / 30
+    df['account_Charges_Daily'] = df['account_Charges_Monthly'] / 30
 
     return df
 
@@ -251,7 +251,7 @@ def conversao_tipos(df):
     df['Churn'] = df['Churn'].astype(int)
     df['account_Charges_Total'] = pd.to_numeric(df['account_Charges_Total'], errors='coerce')
     df['account_Charges_Monthly'] = pd.to_numeric(df['account_Charges_Monthly'], errors='coerce')
-    df['account_Daily'] = pd.to_numeric(df['account_Daily'], errors='coerce')
+    df['account_Charges_Daily'] = pd.to_numeric(df['account_Charges_Daily'], errors='coerce')
 
     return df
 
