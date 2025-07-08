@@ -189,6 +189,21 @@ def describe_full_df(_df: pd.DataFrame):
         return pd.concat([df_temp])
     
 
+def describe_full_df_segmented(df:pd.DataFrame, column_numeric:str, column_category:str, category_values:list=None):
+    if category_values is None:
+        category_values = df[column_category].unique()
+
+    df_desc = []
+    for cv in category_values:
+        df_desc.append(describe_full_df(df.query(f"{column_category} == @cv"))[column_numeric])
+
+    df_desc = pd.concat(df_desc, axis=1)
+    df_desc.columns = category_values
+    df_desc.index.name = column_numeric
+
+    return df_desc
+    
+
 def save_profile_report(df: pd.DataFrame, filename: str, title: str = "Pandas Profiling Report"):
     '''Saves a profile report of a DataFrame to an HTML file.'''
     
