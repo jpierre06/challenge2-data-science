@@ -100,7 +100,7 @@ def count_outlier_values(list_values: list, dtype: Literal['lower', 'upper']):
     return num
 
 
-def describe_full_df(_df: pd.DataFrame):
+def describe_full_df(_df: pd.DataFrame, extend_metrics=False):
     '''Generates a full description of a DataFrame, 
     including additional statistics for numeric columns.
     '''
@@ -108,24 +108,26 @@ def describe_full_df(_df: pd.DataFrame):
     cols_number = _df.select_dtypes(include='number').columns
     df_describe = _df.describe()
     
-    percentile_25 = lambda x: np.percentile(x, 25)
-    percentile_75 = lambda x: np.percentile(x, 75)
-    amplitude = lambda x: np.max(x) - np.min(x)
-    lower_outlier = lambda x: outlier_values(x, 'lower')
-    upper_outlier = lambda x: outlier_values(x, 'upper')
-    count_lower_outlier = lambda x: count_outlier_values(x, 'lower')
-    count_upper_outlier = lambda x: count_outlier_values(x, 'upper')
-    coefficient_variation = lambda x: pd.Series.std(x) / pd.Series.mean(x)
-    shapiro_stat = lambda x: stats.shapiro(x)[0]
-    shapiro_pvalue = lambda x: stats.shapiro(x)[1]
-    int_mean_5p = lambda x: stats.trim_mean(x, proportiontocut=0.05)
-    int_mean_25p = lambda x: stats.trim_mean(x, proportiontocut=0.25)
-    ampl_over_avg = lambda x: amplitude(x) / pd.Series.mean(x)
-    
     if np.all(df_describe.columns == cols_number):
+
+        count_isnull = lambda x: pd.Series.isnull(x).sum()
+        perc_count_isnull = lambda x: pd.Series.isnull(x).mean() * 100
+        percentile_25 = lambda x: np.percentile(x, 25)
+        percentile_75 = lambda x: np.percentile(x, 75)
+        amplitude = lambda x: np.max(x) - np.min(x)
+        lower_outlier = lambda x: outlier_values(x, 'lower')
+        upper_outlier = lambda x: outlier_values(x, 'upper')
+        count_lower_outlier = lambda x: count_outlier_values(x, 'lower')
+        count_upper_outlier = lambda x: count_outlier_values(x, 'upper')
+        coefficient_variation = lambda x: pd.Series.std(x) / pd.Series.mean(x)
+        int_mean_5p = lambda x: stats.trim_mean(x, proportiontocut=0.05)
+        int_mean_25p = lambda x: stats.trim_mean(x, proportiontocut=0.25)
+        ampl_over_avg = lambda x: amplitude(x) / pd.Series.mean(x)
 
         dict_functions = {
             'count': pd.Series.count,
+            'count_isnull': count_isnull,
+            '%_count_isnull': perc_count_isnull,
             'count_zero': count_zero,
             'count_nonzero': np.count_nonzero,
             'count_unique': pd.Series.nunique,
@@ -156,19 +158,27 @@ def describe_full_df(_df: pd.DataFrame):
             'coefficient_var': coefficient_variation, 
             'ampl_over_avg': ampl_over_avg,
             'variance': np.var,
-            'kurt': pd.Series.kurt,
-            'kurtosis': stats.kurtosis,
-            'skew': pd.Series.skew,
-            'shapiro_stat': shapiro_stat,
-            'shapiro_pvalue': shapiro_pvalue,
-            'autocorr': pd.Series.autocorr,
-            'circvar': stats.circvar,
-            'circmean': stats.circmean,
-            'circstd': stats.circstd,
-            'entropy': stats.entropy,
-            'kstat': stats.kstat,
-            'kstatvar': stats.kstatvar,
         }
+
+        if extend_metrics:
+            shapiro_stat = lambda x: stats.shapiro(x)[0]
+            shapiro_pvalue = lambda x: stats.shapiro(x)[1]
+
+            dict_functions.update({
+                'kurt': pd.Series.kurt,
+                'kurtosis': stats.kurtosis,
+                'skew': pd.Series.skew,
+                'shapiro_stat': shapiro_stat,
+                'shapiro_pvalue': shapiro_pvalue,
+                'autocorr': pd.Series.autocorr,
+                'circvar': stats.circvar,
+                'circmean': stats.circmean,
+                'circstd': stats.circstd,
+                'entropy': stats.entropy,
+                'kstat': stats.kstat,
+                'kstatvar': stats.kstatvar,
+            })
+
         
         dict_data = {}
         for col_n in cols_number:
@@ -186,15 +196,16 @@ def describe_full_df(_df: pd.DataFrame):
         df_temp.index = dict_functions.keys()
 
         return pd.concat([df_temp])
-    
+      
 
-def describe_full_df_segmented(df:pd.DataFrame, column_numeric:str, column_category:str, category_values:list=None):
+def describe_full_df_segmented(df:pd.DataFrame, column_numeric:str, column_category:str, category_values:list=None, extend_metrics=False):
     if category_values is None:
         category_values = df[column_category].unique()
 
     df_desc = []
     for cv in category_values:
-        df_desc.append(describe_full_df(df.query(f"{column_category} == @cv"))[column_numeric])
+        _ = describe_full_df(df.query(f"{column_category} == @cv"),extend_metrics=extend_metrics)[column_numeric]
+        df_desc.append(_)
 
     df_desc = pd.concat(df_desc, axis=1)
     df_desc.columns = category_values
