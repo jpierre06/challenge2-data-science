@@ -46,11 +46,16 @@
 * `account_Charges_Monthly`: total de todos os serviços do cliente por mês
 * `account_Charges_Total`: total gasto pelo cliente
 * `internet_Service_Description`: descrição da assinatura de um provedor internet
-* `customer_tenure_bins`:  agrupamento de tempo de contrato do cliente a cada 12 meses 
-* `account_Charges_Monthly_bins`: agrupamento do total de todos os serviços do cliente a cada 20 reais
+* `customer_tenure_bins`:  agrupamento de tempo de contrato do cliente a cada 12 meses
+* `account_Charges_Monthly_bins`: agrupamento dos valores mensal de todos os serviços do cliente a cada 20 reais
+* `account_Charges_Total_bins`: agrupamento dos valores total de todos os serviços do cliente
 * `account_Contract_Monthly`: se cliente tem tipo de assinatura mensal
 * `additional_InternetService`: quantidade total de serviços adicionais de internet contratados
 * `only_PhoneService`: se cliente assina somente serviço de telefonia
 * `only_InternetService`: se cliente assina somente serviço de internet
 * `both_Phone_InternetService`: se cliente assina ambos serviços de telefonia e internet
-* `account_Daily`: média diária de custo com serviços do cliente baseado no custo mensal considerando o mês comercial de 30 dias
+* `account_Charges_Daily`: média diária de custo com serviços do cliente baseado no custo mensal considerando o mês comercial de 30 dias
+
+<br>
+
+[Retornar ao README](README.md)
