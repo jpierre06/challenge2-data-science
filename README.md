@@ -59,9 +59,10 @@ Identificar quais variáveis estão mais fortemente associadas ao Churn de clien
 
 # 🔍 Dicionário de Dados
 
-Para acesso ao dicionário de dados disponibilizado para análise e dionário de dados criado após os processos de transformação e agregação acessar arquivo 
+Para acesso ao dicionário de dados disponibilizado para análise e dionário de dados criado após os processos de transformação e agregação acessar o link abaixo. 
 
-TelecomX_dicionario.md
+[Dicionário de Dados](TelecomX_dicionario.md)
+
 
 </br>
 
