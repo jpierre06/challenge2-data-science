@@ -275,3 +275,35 @@ def get_chi_square(df:pd.DataFrame, reference_category: str, target_category: li
         df_chi_square.sort_values(by='variable', ascending=True, inplace=True)
 
     return df_chi_square
+
+
+def create_standardized_normal_table():
+    """Creates a standardized normal distribution table with Z-scores and their cumulative probabilities."""
+    standardized_normal_table = pd.DataFrame(
+        [], 
+        index=["{0:0.2f}".format(i / 100) for i in range(0, 400, 10)],
+        columns = ["{0:0.2f}".format(i / 100) for i in range(0, 10)])
+    
+    for index in standardized_normal_table.index:
+        for column in standardized_normal_table.columns:
+            Z = np.round(float(index) + float(column), 2)
+            standardized_normal_table.loc[index, column] = f"{stats.norm.cdf(Z):0.8f}"
+    
+    standardized_normal_table.rename_axis('Z', axis = 'columns', inplace = True)
+
+    return standardized_normal_table
+
+
+def get_standardized_normal(value_z, df_norm=None, is_print=False):
+    """Returns the cumulative probability for a given Z-score from a standardized normal distribution table."""
+    if df_norm is None:
+        df_norm = create_standardized_normal_table()
+    
+    value_z = round(value_z, 2)
+    row = f"{np.math.floor(value_z * 10) /10:.2f}"  # integer part and first decimal place
+    column = f"{value_z * 10 % 1 /10:.2f}"  # second decimal place
+    if is_print:
+        print(f'Row {row} e column {column}')
+    
+    # quering normalized table
+    return float(df_norm.loc[row, column])
