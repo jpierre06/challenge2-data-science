@@ -7,7 +7,6 @@ import numpy as np
 from scipy import stats
 import math
 
-from ydata_profiling import ProfileReport
 
 
 def print_notebook_versions():
@@ -207,6 +206,8 @@ def describe_full_df_segmented(df:pd.DataFrame, column_numeric:str, column_categ
 def save_profile_report(df: pd.DataFrame, filename: str, title: str = "Pandas Profiling Report"):
     '''Saves a profile report of a DataFrame to an HTML file.'''
     
+    from ydata_profiling import ProfileReport
+
     filename=f'{filename}.html'
     ProfileReport(df, title=title, explorative=True, progress_bar=False).to_file(filename)
     #profile = ProfileReport(df, title=title, explorative=True)
