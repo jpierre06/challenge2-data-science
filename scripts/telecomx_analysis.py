@@ -12,18 +12,16 @@ import scripts.local_tools as lt
 
 
 def carregar_dados_telecomx_normalizado(caminho_arquivo_json: str, imprimir=True):
-    ...
     # Fazendo a requisição HTTP
     response = requests.get(caminho_arquivo_json)
     # Verificando se a requisição foi bem-sucedida
     if response.status_code == 200:
         dados_telecom = json.loads(response.text)
+        df = pd.json_normalize(dados_telecom, sep='_', meta=['customerID', 'Churn'])
+        return df    
     else:
         print("Erro ao acessar o arquivo:", response.status_code)
-
-    df = pd.json_normalize(dados_telecom, sep='_', meta=['customerID', 'Churn'])
-
-    return df
+        return None
 
 
 def extrair_colunas_categoricas(df: pd.DataFrame, quantidade_minima=5, imprimir=True):
@@ -190,17 +188,27 @@ def criar_colunas_derivadas(df):
         labels=[f'R\${str(bins[i]).zfill(3)}-R\${str(bins[i+1]-1).zfill(3)}' for i in range(len(bins)-1)]
     )
 
-    #  Criação de coluna por faixa de custo mensal do total 
-    # Usando Regra de Sturges
+    # #  Criação de coluna por faixa de custo mensal do total 
+    # # Usando Regra de Sturges
     n = len(df)
-    # Regra de Sturges
-    k = 1 + (10/3) * math.log10(n)
-    k = int(k)
+    k = int(1 + (10 / 3) * math.log10(n))
+
+    min_val = int(df['account_Charges_Total'].min())
+    max_val = int(df['account_Charges_Total'].max())
+
+    # Cria os bins manualmente com base no intervalo total e k
+    bin_width = (max_val - min_val) // k + 1
+    bins = list(range(min_val, max_val + bin_width, bin_width))
+
+    # Gerar os labels
+    labels = [f'R\${str(bins[i]).zfill(5)}-R\${str(bins[i+1]-1).zfill(5)}' for i in range(len(bins)-1)]
+
+    # Aplicar no cut
     df['account_Charges_Total_bins'] = pd.cut(
-        df.account_Charges_Total, 
-        bins=k, 
-        right=False # intervalo fechado à esquerda, aberto à direita
-        labels=[f'R\${str(bins[i]).zfill(5)}-R\${str(bins[i+1]-1).zfill(5)}' for i in range(len(bins)-1)]
+        df['account_Charges_Total'],
+        bins=bins,
+        right=False,
+        labels=labels
     )
 
     # Informações de contratos mensais
