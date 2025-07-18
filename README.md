@@ -34,6 +34,7 @@ challenge2-data-science/
 │
 ├── TelecomX_BR.ipynb                  # Notebook principal com toda a análise
 ├── README.md                          # Este arquivo
+├── TelecomX_dicionario.md             # Dicionário de Dados
 ├── report/
 │   ├── telecom_data_report_before.html # Relatório antes do tratamento
 │   └── telecom_data_report_after.html  # Relatório após o tratamento
